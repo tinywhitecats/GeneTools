@@ -23,7 +23,6 @@ namespace GeneTools
         public List<BodyTypeDef> allowedBodyTypes;
         public List<HeadTypeDef> forcedHeadTypes;
         public List<HeadTypeDef> allowedHeadTypes;
-
     }
 
     public class GeneToolsBodyTypeDef : DefModExtension
@@ -36,5 +35,6 @@ namespace GeneTools
     {
         public bool colorHead = true;
         public bool useShader;
+        public bool enforceHelmets = false;
     }
 }
