@@ -11,6 +11,10 @@ Differences here from the experimental branch:
 -  Refactored source code.
 -  New hair extension as GeneToolsHairDef.useSkinColor. Enabling this passes a pawn's skin color as a second color to the hair shader. This takes priority over HairModdingPlus when enabled.
 
+Notes:
+-  Substitute bodies don't work on fur graphics (e.g. furskin), don't let a pawn have both at once! Looking in to this.
+-  Vanilla bodytype genes take precedent over forced bodytypes on adults. I've looked into this, but haven't figured out why. For now, I'd recommend adding the (adult) bodytypes in the vanilla way as well.
+
 Regarding HAR support:
 -  For the most part, all GeneTools features are disabled on HAR aliens. The issue with HAR is that almost all the appearance handling is in one function, and it completely bypasses all the vanilla systems. While I'd like to make (e.g) GT bodies override HAR bodies, I can't really do that without completely replacing the entire texture handler for HAR.
-- The HAR texture handler crashes the entire game with GT bodies and heads. I can't let it run alongside GT stuff.
+-  The HAR texture handler crashes the entire game with GT bodies and heads. I can't let it run alongside GT stuff.

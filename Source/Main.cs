@@ -30,7 +30,7 @@ namespace GeneTools
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicRecordGetter), "TryGetGraphicApparel"), prefix: new HarmonyMethod(typeof(GtPatches.GtResolveApparelGraphic), "Prefix"));
                     harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtPatches.GtCanEquip), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "CalculateHairMats"), postfix: new HarmonyMethod(typeof(GtPatches.GtCalculateHairMats), "Postfix"));
-
+                    //harmony.Patch((MethodBase)AccessTools.Method(typeof(FurDef), "GetFurBodyGraphicPath"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveFurGraphic), "Postfix"));
                     if (HARactive)
                     {
                         Log.Message("[GeneTools] Detected HAR!");

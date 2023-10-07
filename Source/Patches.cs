@@ -53,10 +53,8 @@ namespace GeneTools
                 List<Gene> genesListForReading = pawn.genes.GenesListForReading;
                 foreach (Gene gene in genesListForReading)
                 {
-                    //Log.Warning("Checking: " + gene.def.defName);
                     if (gene.def.HasModExtension<GeneToolsGeneDef>())
                     {
-                        //Log.Warning("--FOUND: " + gene.def.defName);
                         if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
                             __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby.Count)];
                         else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null && pawn.DevelopmentalStage == DevelopmentalStage.Child)
@@ -192,6 +190,26 @@ namespace GeneTools
                 if (useSubstitute) //This applies to HAR aliens! Is this bad?
                 {
                     bodyType = bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody;
+                }
+            }
+        }
+        /* Allow body to use substitute fur gene texture if available */
+        //Unfinished/broken
+        [HarmonyPatch(typeof(FurDef), "GetFurBodyGraphicPath")]
+        public static class GtResolveFurGraphic
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref Pawn pawn, string __result, FurDef __instance)
+            {
+                if (__result == null && pawn.story.bodyType.HasModExtension<GeneToolsBodyTypeDef>() &&
+                    pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null)
+                {
+                    for (int i = 0; i < __instance.bodyTypeGraphicPaths.Count; i++)
+                    {
+                        if (__instance.bodyTypeGraphicPaths[i].bodyType == 
+                            pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody)
+                            __result = __instance.bodyTypeGraphicPaths[i].texturePath;
+                    }
                 }
             }
         }
