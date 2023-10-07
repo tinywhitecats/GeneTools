@@ -49,14 +49,14 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(Pawn pawn, ref BodyTypeDef __result)
             {
-                Log.Message("GtGetBodyTypeFor for " + pawn.Name);
+                //Log.Message("GtGetBodyTypeFor for " + pawn.Name);
                 List<Gene> genesListForReading = pawn.genes.GenesListForReading;
                 foreach (Gene gene in genesListForReading)
                 {
-                    Log.Warning("Checking: " + gene.def.defName);
+                    //Log.Warning("Checking: " + gene.def.defName);
                     if (gene.def.HasModExtension<GeneToolsGeneDef>())
                     {
-                        Log.Warning("--FOUND: " + gene.def.defName);
+                        //Log.Warning("--FOUND: " + gene.def.defName);
                         if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
                             __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby.Count)];
                         else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null && pawn.DevelopmentalStage == DevelopmentalStage.Child)
@@ -83,7 +83,7 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(ref Pawn ___pawn, GeneDef addedOrRemovedGene)
             {
-                Log.Message("GtNotify_GenesChanged for " + ___pawn.Name);
+                //Log.Message("GtNotify_GenesChanged for " + ___pawn.Name);
                 if (___pawn.RaceProps.Humanlike)
                 {
                     if (addedOrRemovedGene != null && addedOrRemovedGene.HasModExtension<GeneToolsGeneDef>())
@@ -101,10 +101,7 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(PawnGraphicSet __instance)
             {
-                Log.Message("GtResolveAllGraphics for " + __instance.pawn.Name);
-                Log.Message("Head type is " + __instance.pawn.story.headType.defName);
-                Log.Message("Body type is " + __instance.pawn.story.bodyType.defName);
-                Log.Message("Body path is " + __instance.pawn.story.bodyType.bodyNakedGraphicPath);
+                //Log.Message("GtResolveAllGraphics for " + __instance.pawn.Name);
                 if (__instance.pawn.RaceProps.Humanlike)
                 {
                     Color skinColor = __instance.pawn.story.SkinColor;
@@ -126,7 +123,7 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(ref Thing thing, ref Pawn pawn, out string cantReason, ref bool __result)
             {
-                Log.Message("GtCanEquip for " + pawn.Name);
+                //Log.Message("GtCanEquip for " + pawn.Name);
                 cantReason = (string)null; //This might eat reasons from other patches :(
                 if (pawn.RaceProps.Humanlike && __result && thing.def.IsApparel)
                 {
@@ -144,7 +141,7 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(Pawn p, ThingDef apparel, ref bool __result)
             {
-                Log.Message("GtAllowedForPawn for " + p.Name);
+                //Log.Message("GtAllowedForPawn for " + p.Name);
                 if (p.RaceProps.Humanlike && __result)
                     __result = GtCanPawnEquip(ref apparel, ref p);
             }
@@ -155,7 +152,7 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(ref Pawn pawn, ref Apparel ap, ref List<float> wornScoresCache, ref float __result)
             {
-                Log.Message("GtApparelScoreGain for " + pawn.Name);
+                //Log.Message("GtApparelScoreGain for " + pawn.Name);
                 if (pawn.RaceProps.Humanlike)
                     __result = GtCanPawnEquip(ref ap.def, ref pawn) ? __result : - 1000f;
             }
@@ -182,7 +179,7 @@ namespace GeneTools
             [HarmonyPrefix]
             public static void Prefix(ref Apparel apparel, ref BodyTypeDef bodyType)
             {
-                Log.Message("GtResolveApparelGraphic for " + bodyType.defName);
+                //Log.Message("GtResolveApparelGraphic for " + bodyType.defName);
                 bool useSubstitute = apparel.def.HasModExtension<GeneToolsApparelDef>() 
                     && apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes != null 
                     && !apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType) 
@@ -201,7 +198,7 @@ namespace GeneTools
             [HarmonyPrefix]
             public static bool Prefix(ref Pawn pawn, out BodyTypeDef def, ref bool __result)
             {
-                Log.Message("GtTryGetBodyTypeFallbackHARPatch for " + pawn.Name);
+                //Log.Message("GtTryGetBodyTypeFallbackHARPatch for " + pawn.Name);
                 def = (BodyTypeDef)null;
                 if (pawn == null) //continue to original
                     return true;
@@ -225,7 +222,7 @@ namespace GeneTools
             public static bool Prefix(object[] __args, ref bool __result)
             {
                 PawnGraphicSet __instance = (PawnGraphicSet)__args[0]; //Can't access __instance normally since Harmony interprets that literally
-                Log.Message("GtResolveAllGraphicsStopHAR for " + __instance.pawn.Name);
+                //Log.Message("GtResolveAllGraphicsStopHAR for " + __instance.pawn.Name);
                 if (__instance.pawn.RaceProps.Humanlike)
                 {
                     bool isGTHuman = false;
