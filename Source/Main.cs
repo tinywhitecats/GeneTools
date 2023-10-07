@@ -10,61 +10,37 @@ namespace GeneTools
     [StaticConstructorOnStartup]
     public class Main
     {
-        public static bool HARactive;
+        static readonly bool HARactive = (LoadedModManager.RunningModsListForReading
+            .Any<ModContentPack>((Predicate<ModContentPack>)(x => x.Name.Contains("Humanoid Alien Races")))
+            || LoadedModManager.RunningModsListForReading
+            .Any<ModContentPack>((Predicate<ModContentPack>)(x => x.PackageId == "erdelf.HumanoidAlienRaces"))
+            );
         static Main() 
         {
-            if (LoadedModManager.RunningModsListForReading.Any<ModContentPack>((Predicate<ModContentPack>)(x => x.Name == "Humanoid Alien Races 2.0")))
-                Main.HARactive = true;
-            if (LoadedModManager.RunningModsListForReading.Any<ModContentPack>((Predicate<ModContentPack>)(x => x.Name.Contains("Humanoid Alien Races"))))
-                Main.HARactive = true;
-            if (LoadedModManager.RunningModsListForReading.Any<ModContentPack>((Predicate<ModContentPack>)(x => x.PackageId == "erdelf.HumanoidAlienRaces")))
-                Main.HARactive = true;
             Harmony harmony = new Harmony("GeneTools");
-            /*If HAR is loaded and HARfix in the options menu is enabled, load the patches that make this mod only affect humans and prevent HAR from affecting humans affected by this mod*/
             try
             {
                 ((Action)(() =>
                 {
-                    if (Main.HARactive && GeneToolsSettings.HARfix)
-                    { /*
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "ResolveAllGraphics"), prefix: new HarmonyMethod(typeof(ResolveAllGraphicsHARpatch), "Prefix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "ResolveAllGraphics"), postfix: new HarmonyMethod(typeof(GtResolveAllGraphicsHARpatch), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGenerator), "GetBodyTypeFor"), postfix: new HarmonyMethod(typeof(GtGetBodyTypeForHARpatch), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_GeneTracker), "Notify_GenesChanged"), postfix: new HarmonyMethod(typeof(GtNotify_GenesChangedHARpatch), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelRequirement), "AllowedForPawn"), postfix: new HarmonyMethod(typeof(GtAllowedForPawnHARPatch), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(JobGiver_OptimizeApparel), "ApparelScoreGain"), postfix: new HarmonyMethod(typeof(GtApparelScoreGainHARPatch), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"), postfix: new HarmonyMethod(typeof(GtCanUsePairHARPatch), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicRecordGetter), "ResolveApparelGraphics"), prefix: new HarmonyMethod(typeof(GtResolveApparelGraphicsHARPatch), "Prefix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicsOverrides), "TryGetBodyTypeFallback"), postfix: new HarmonyMethod(typeof(GtTryGetBodyTypeFallbackHARPatch), "Postfix"));
-                        harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtCanEquipHARPatch), "Postfix"));
-                        */
-                        Log.Message("[GeneTools] HAR Patches Applied");
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "ResolveAllGraphics"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveAllGraphics), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGenerator), "GetBodyTypeFor"), postfix: new HarmonyMethod(typeof(GtPatches.GtGetBodyTypeFor), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_GeneTracker), "Notify_GenesChanged"), postfix: new HarmonyMethod(typeof(GtPatches.GtNotify_GenesChanged), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelRequirement), "AllowedForPawn"), postfix: new HarmonyMethod(typeof(GtPatches.GtAllowedForPawn), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(JobGiver_OptimizeApparel), "ApparelScoreGain"), postfix: new HarmonyMethod(typeof(GtPatches.GtApparelScoreGain), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"), postfix: new HarmonyMethod(typeof(GtPatches.GtCanUsePair), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicRecordGetter), "TryGetGraphicApparel"), prefix: new HarmonyMethod(typeof(GtPatches.GtResolveApparelGraphic), "Prefix"));
+                    harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtPatches.GtCanEquip), "Postfix"));
+                    if (HARactive) {
+                        HARPatcher.patch();
+                        Log.Message("[GeneTools] Detected HAR!");
                     }
-
+                    Log.Message("[GeneTools] Active");
                 }))();
             }
-            catch (TypeLoadException) { }
-            try
-            {
-                ((Action)(() =>
-                {
-
-                    if (!Main.HARactive || !GeneToolsSettings.HARfix)
-                    {                 
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "ResolveAllGraphics"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveAllGraphics), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGenerator), "GetBodyTypeFor"), postfix: new HarmonyMethod(typeof(GtPatches.GtGetBodyTypeFor), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_GeneTracker), "Notify_GenesChanged"), postfix: new HarmonyMethod(typeof(GtPatches.GtNotify_GenesChanged), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelRequirement), "AllowedForPawn"), postfix: new HarmonyMethod(typeof(GtPatches.GtAllowedForPawn), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(JobGiver_OptimizeApparel), "ApparelScoreGain"), postfix: new HarmonyMethod(typeof(GtPatches.GtApparelScoreGain), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"), postfix: new HarmonyMethod(typeof(GtPatches.GtCanUsePair), "Postfix"));
-                        harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicRecordGetter), "TryGetGraphicApparel"), prefix: new HarmonyMethod(typeof(GtPatches.GtResolveApparelGraphic), "Prefix"));
-                        harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtPatches.GtCanEquip), "Postfix"));
-                        Log.Message("[GeneTools] HAR not found or HAR fix disabled");
-                    }
-
-                }))();
+            catch (TypeLoadException e) {
+                Log.Error("[GeneTools] TypeLoadException:");
+                Log.Error(e.StackTrace);
             }
-            catch (TypeLoadException) { }
         } 
     }
 }

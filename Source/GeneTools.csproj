@@ -54,7 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HARpatch.cs" />
+    <Compile Include="HARPatcher.cs" />
     <Compile Include="ModSettings.cs" />
     <Compile Include="Patches.cs" />
     <Compile Include="GeneToolsModExtensions.cs" />

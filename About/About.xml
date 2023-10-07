@@ -13,12 +13,12 @@
 	</li>	
 	</modDependencies>
 	<loadAfter>
-  	<li>brrainz.harmony</li>
-	<li>Ludeon.RimWorld</li>
-	<li>Ludeon.RimWorld.Royalty</li>
-	<li>Ludeon.RimWorld.Ideology</li>
-	<li>Ludeon.RimWorld.Biotech</li>
-	<li>erdelf.HumanoidAlienRaces</li>
-  </loadAfter>
+  		<li>brrainz.harmony</li>
+		<li>Ludeon.RimWorld</li>
+		<li>Ludeon.RimWorld.Royalty</li>
+		<li>Ludeon.RimWorld.Ideology</li>
+		<li>Ludeon.RimWorld.Biotech</li>
+		<li>erdelf.HumanoidAlienRaces</li>
+	 </loadAfter>
   <description>Modding tools for creating xenos. Adds the ability to use a gene to assign custom body types, and restrict apparel to certain body types in xml. Also allows texture masking for bodies and heads so you can control what parts of a body are skin colored, or if they are at all. View usage instructions here: https://github.com/prkrdp/GeneTools/wiki</description>
 </ModMetaData>
