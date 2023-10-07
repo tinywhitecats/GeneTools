@@ -13,7 +13,7 @@ Differences here from the experimental branch:
 
 Notes:
 -  Substitute bodies don't work on fur graphics (e.g. furskin), don't let a pawn have both at once! Looking in to this.
--  Vanilla bodytype genes take precedent over forced bodytypes on adults. I've looked into this, but haven't figured out why. For now, I'd recommend adding the (adult) bodytypes in the vanilla way as well.
+-  Vanilla bodytype genes take precedent over forced bodytypes on adults. I've looked into this, but haven't figured out why.
 
 Regarding HAR support:
 -  For the most part, all GeneTools features are disabled on HAR aliens. The issue with HAR is that almost all the appearance handling is in one function, and it completely bypasses all the vanilla systems. While I'd like to make (e.g) GT bodies override HAR bodies, I can't really do that without completely replacing the entire texture handler for HAR.
