@@ -99,6 +99,7 @@ namespace GeneTools
         public static class GtResolveAllGraphics
         {
             [HarmonyPostfix]
+            [HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
             public static void Postfix(PawnGraphicSet __instance)
             {
                 //Log.Message("GtResolveAllGraphics for " + __instance.pawn.Name);
@@ -115,6 +116,7 @@ namespace GeneTools
                     else if (__instance.pawn.story.headType.HasModExtension<GeneToolsHeadTypeDef>() && __instance.pawn.story.headType.GetModExtension<GeneToolsHeadTypeDef>().colorHead == false)
                         __instance.headGraphic = GraphicDatabase.Get<Graphic_Multi>(__instance.pawn.story.headType.graphicPath, ShaderUtility.GetSkinShader(__instance.pawn.story.SkinColorOverriden), Vector2.one, Color.white);
                 }
+                GtCalculateHairMats.Postfix(__instance);
             }
         }
         /* Prevent player from making pawn equip apparel that doesn't fit the body */
@@ -179,15 +181,25 @@ namespace GeneTools
             [HarmonyPrefix]
             public static void Prefix(ref Apparel apparel, ref BodyTypeDef bodyType)
             {
-                //Log.Message("GtResolveApparelGraphic for " + bodyType.defName);
+                Log.Message("GtResolveApparelGraphic for " + bodyType.defName);
+                Log.Warning(apparel.def.HasModExtension<GeneToolsApparelDef>() ? " 1true" : " 1false");
+                Log.Warning(apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes != null ? "2 true" : "2 false");
+                Log.Warning(!apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType) ? "3 true" : "3 false");
+                Log.Warning(bodyType.HasModExtension<GeneToolsBodyTypeDef>() ? "4 true" : "4 false");
+                Log.Warning(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null ? "5 true" : "5 false");
+                Log.Warning(apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody) ? "6 true" : "6 false");
+
                 bool useSubstitute = apparel.def.HasModExtension<GeneToolsApparelDef>() 
                     && apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes != null 
                     && !apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType) 
-                    && bodyType.HasModExtension<GeneToolsBodyTypeDef>() && bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null 
+                    && bodyType.HasModExtension<GeneToolsBodyTypeDef>() 
+                    && bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null 
                     && apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody)
                     ? true : false;
+                Log.Message("Use sub: " + useSubstitute);
                 if (useSubstitute) //This applies to HAR aliens! Is this bad?
                 {
+                    Log.Message(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody.defName);
                     bodyType = bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody;
                 }
             }
@@ -239,6 +251,20 @@ namespace GeneTools
                     return !isGTHuman;
                 }
                 return true;
+            }
+        }
+        public static class GtCalculateHairMats {
+            [HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
+            [HarmonyPostfix]
+            public static void Postfix(PawnGraphicSet __instance)
+            {
+                if (__instance.pawn.RaceProps.Humanlike
+                    && __instance.pawn.story.hairDef.HasModExtension<GeneToolsHairDef>() 
+                    && __instance.pawn.story.hairDef.GetModExtension<GeneToolsHairDef>().useSkinColor == true)
+                {
+                    string hairTexturePath = __instance.pawn.story.hairDef.texPath;
+                    __instance.hairGraphic = hairTexturePath == null ? null : GraphicDatabase.Get<Graphic_Multi>(hairTexturePath, ShaderDatabase.CutoutComplex, Vector2.one, __instance.pawn.story.HairColor, __instance.pawn.story.SkinColor);
+                }
             }
         }
     }

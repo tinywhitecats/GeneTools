@@ -37,4 +37,8 @@ namespace GeneTools
         public bool useShader;
         public bool enforceHelmets = false;
     }
+    public class GeneToolsHairDef : DefModExtension
+    {
+        public bool useSkinColor = false;
+    }
 }
