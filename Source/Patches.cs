@@ -181,14 +181,7 @@ namespace GeneTools
             [HarmonyPrefix]
             public static void Prefix(ref Apparel apparel, ref BodyTypeDef bodyType)
             {
-                Log.Message("GtResolveApparelGraphic for " + bodyType.defName);
-                Log.Warning(apparel.def.HasModExtension<GeneToolsApparelDef>() ? " 1true" : " 1false");
-                Log.Warning(apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes != null ? "2 true" : "2 false");
-                Log.Warning(!apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType) ? "3 true" : "3 false");
-                Log.Warning(bodyType.HasModExtension<GeneToolsBodyTypeDef>() ? "4 true" : "4 false");
-                Log.Warning(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null ? "5 true" : "5 false");
-                Log.Warning(apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody) ? "6 true" : "6 false");
-
+                //Log.Message("GtResolveApparelGraphic for " + bodyType.defName);
                 bool useSubstitute = apparel.def.HasModExtension<GeneToolsApparelDef>() 
                     && apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes != null 
                     && !apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType) 
@@ -196,10 +189,8 @@ namespace GeneTools
                     && bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null 
                     && apparel.def.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody)
                     ? true : false;
-                Log.Message("Use sub: " + useSubstitute);
                 if (useSubstitute) //This applies to HAR aliens! Is this bad?
                 {
-                    Log.Message(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody.defName);
                     bodyType = bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody;
                 }
             }
