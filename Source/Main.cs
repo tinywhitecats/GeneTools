@@ -1,5 +1,4 @@
-﻿using AlienRace.ApparelGraphics;
-using HarmonyLib;
+﻿using HarmonyLib;
 using RimWorld;
 using System;
 using System.Reflection;
@@ -8,7 +7,7 @@ using Verse;
 namespace GeneTools
 {
     [StaticConstructorOnStartup]
-    public class Main
+    public static class Main
     {
         static readonly bool HARactive = (LoadedModManager.RunningModsListForReading
             .Any<ModContentPack>((Predicate<ModContentPack>)(x => x.Name.Contains("Humanoid Alien Races")))
@@ -30,9 +29,10 @@ namespace GeneTools
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"), postfix: new HarmonyMethod(typeof(GtPatches.GtCanUsePair), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicRecordGetter), "TryGetGraphicApparel"), prefix: new HarmonyMethod(typeof(GtPatches.GtResolveApparelGraphic), "Prefix"));
                     harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtPatches.GtCanEquip), "Postfix"));
-                    if (HARactive) {
-                        HARPatcher.patch();
+                    if (HARactive)
+                    {
                         Log.Message("[GeneTools] Detected HAR!");
+                        HARPatcher.patch();
                     }
                     Log.Message("[GeneTools] Active");
                 }))();
