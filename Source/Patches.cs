@@ -47,7 +47,7 @@ namespace GeneTools
                 if (!allowedHeads.Contains(headType))
                     return false;
             }
-            Log.Message("TRUE");
+            //Log.Message("TRUE");
             return true;
         }
         /* Set body type to any forced by genes */
