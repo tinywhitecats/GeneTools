@@ -1,7 +1,7 @@
 <ModMetaData>
-	<name>Gene Tools - Forked</name>
+	<name>Gene Tools - Forked DEV BUILD</name>
 	<author>prkr, tinywhitecat</author>
-    <packageId>prkr.GeneTools</packageId>
+    <packageId>prkr.GeneToolsDEV</packageId>
 	<supportedVersions>
 		<li>1.4</li>
 	</supportedVersions>

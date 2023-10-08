@@ -10,7 +10,8 @@ namespace GeneTools
     {
         public static bool GtCanPawnEquip(ref ThingDef apparel, ref Pawn pawn)
         {
-            //Log.Message("GtCanPawnEquip for " + pawn.Name);
+            //Log.Message("GtCanPawnEquip for " + pawn.Name + "," + apparel.defName);
+
             BodyTypeDef bodyType = pawn.story.bodyType;
             HeadTypeDef headType = pawn.story.headType;
             bool useSubstitute = apparel.HasModExtension<GeneToolsApparelDef>() && apparel.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes != null && !apparel.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType) && bodyType.HasModExtension<GeneToolsBodyTypeDef>() && bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null && apparel.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody) ? true : false;
@@ -20,6 +21,7 @@ namespace GeneTools
             
             bool enforceInvisibleBody = bodyType.HasModExtension<GeneToolsBodyTypeDef>() && bodyType.GetModExtension<GeneToolsBodyTypeDef>().enforceOnInvisibleApparel;
             bool enforceInvisibleHead = headType.HasModExtension<GeneToolsHeadTypeDef>() && headType.GetModExtension<GeneToolsHeadTypeDef>().enforceOnInvisibleApparel;
+            //Log.Message(bodyType.defName + "," + headType.defName + "," + useSubstitute + "," + isHat + "," + isInvisible);
 
             if (!GeneToolsSettings.bypassApparel && (!isInvisible || enforceInvisibleBody) && !isHat && apparel.HasModExtension<GeneToolsApparelDef>() && apparel.GetModExtension<GeneToolsApparelDef>().forcedBodyTypes != null)
             {
@@ -45,36 +47,41 @@ namespace GeneTools
                 if (!allowedHeads.Contains(headType))
                     return false;
             }
+            Log.Message("TRUE");
             return true;
         }
         /* Set body type to any forced by genes */
         public static class GtGetBodyTypeFor
         {
             [HarmonyPostfix]
-            public static void Postfix(Pawn pawn, ref BodyTypeDef __result)
+            public static void Postfix(ref Pawn pawn, ref BodyTypeDef __result)
             {
+                //Don't forget, this has a side effect of possibly changing head type!
                 //Log.Message("GtGetBodyTypeFor for " + pawn.Name);
-                List<Gene> genesListForReading = pawn.genes.GenesListForReading;
-                foreach (Gene gene in genesListForReading)
+                if (pawn != null && pawn.genes != null) //har bugfix - addiction checker calls this??? wack
                 {
-                    if (gene.def.HasModExtension<GeneToolsGeneDef>())
+                    List<Gene> genesListForReading = pawn.genes.GenesListForReading;
+                    foreach (Gene gene in genesListForReading)
                     {
-                        if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
-                            __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby.Count)];
-                        else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null && pawn.DevelopmentalStage == DevelopmentalStage.Child)
-                            __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild.Count)];
-                        else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null && pawn.gender == Gender.Female && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
-                            __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale.Count)];
-                        else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
-                            __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes.Count)];
-                        if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
-                            pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesBaby[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesBaby.Count)];
-                        else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild != null && pawn.DevelopmentalStage == DevelopmentalStage.Child)
-                            pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild.Count)];
-                        else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale != null && pawn.gender == Gender.Female && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
-                            pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale.Count)];
-                        else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes != null && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
-                            pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes.Count)];
+                        if (gene.def.HasModExtension<GeneToolsGeneDef>())
+                        {
+                            if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
+                                __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null && pawn.DevelopmentalStage == DevelopmentalStage.Child)
+                                __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null && pawn.gender == Gender.Female && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
+                                __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
+                                __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes.Count)];
+                            if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
+                                pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesBaby[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesBaby.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild != null && pawn.DevelopmentalStage == DevelopmentalStage.Child)
+                                pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale != null && pawn.gender == Gender.Female && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
+                                pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes != null && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
+                                pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes.Count)];
+                        }
                     }
                 }
             }
@@ -83,7 +90,7 @@ namespace GeneTools
         public static class GtNotify_GenesChanged
         {
             [HarmonyPostfix]
-            public static void Postfix(ref Pawn ___pawn, GeneDef addedOrRemovedGene)
+            public static void Postfix(ref Pawn ___pawn, ref GeneDef addedOrRemovedGene)
             {
                 //Log.Message("GtNotify_GenesChanged for " + ___pawn.Name);
                 if (___pawn.RaceProps.Humanlike)
@@ -91,9 +98,36 @@ namespace GeneTools
                     if (addedOrRemovedGene != null && addedOrRemovedGene.HasModExtension<GeneToolsGeneDef>())
                     {
                         if (addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null)
+                        {
                             ___pawn.story.bodyType = Verse.PawnGenerator.GetBodyTypeFor(___pawn);
-                        ___pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
+                            ___pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
+                        }
                     }
+                }
+            }
+        }
+        /* Update on age progression */
+        public static class GtNotify_LifeStageStarted
+        {
+            //only runs on adults - LifeStageWorker_HumanlikeAdult
+            [HarmonyPrefix]
+            public static void Prefix(ref Pawn pawn)
+            {
+                //Log.Message("Notify_LifeStageStarted for " + pawn.Name);
+                if (pawn.RaceProps.Humanlike)
+                {
+                    HeadTypeDef oldHead = pawn.story.headType;
+                    BodyTypeDef newDef = Verse.PawnGenerator.GetBodyTypeFor(pawn);
+                    if (newDef != pawn.story.bodyType || oldHead != pawn.story.headType)
+                    {
+                        //Log.Message("Change detected!");
+                        pawn.story.bodyType = newDef;
+                        Pawn p = pawn;
+                        if (pawn.apparel != null)
+                            pawn.apparel.DropAllOrMoveAllToInventory(
+                                (Apparel apparel) => !GtCanPawnEquip(ref apparel.def, ref p) || !apparel.def.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult));
+                    }
+                    //___pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
                 }
             }
         }
@@ -101,8 +135,8 @@ namespace GeneTools
         public static class GtResolveAllGraphics
         {
             [HarmonyPostfix]
-            [HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
-            public static void Postfix(PawnGraphicSet __instance)
+            //[HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
+            public static void Postfix(ref PawnGraphicSet __instance)
             {
                 //Log.Message("GtResolveAllGraphics for " + __instance.pawn.Name);
                 if (__instance.pawn.RaceProps.Humanlike)
@@ -125,14 +159,15 @@ namespace GeneTools
         public static class GtCanEquip 
         {
             [HarmonyPostfix]
-            public static void Postfix(ref Thing thing, ref Pawn pawn, out string cantReason, ref bool __result)
+            public static void Postfix(ref Thing thing, ref Pawn pawn, ref string cantReason, ref bool __result)
             {
                 //Log.Message("GtCanEquip for " + pawn.Name);
-                cantReason = (string)null; //This might eat reasons from other patches :(
                 if (pawn.RaceProps.Humanlike && __result && thing.def.IsApparel)
                 {
-                    BodyTypeDef bodyType = pawn.story.bodyType;
-                    bool isHat = thing.def.apparel.LastLayer == ApparelLayerDefOf.Overhead || thing.def.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.FullHead) || thing.def.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.UpperHead) || thing.def.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.Eyes) ? true : false;
+                    bool isHat = thing.def.apparel.LastLayer == ApparelLayerDefOf.Overhead 
+                        || thing.def.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.FullHead) 
+                        || thing.def.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.UpperHead) 
+                        || thing.def.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.Eyes) ? true : false;
                     __result = GtCanPawnEquip(ref thing.def, ref pawn);
                     if (!__result)
                         cantReason = (string)"does not fit " + (!isHat ? pawn.story.bodyType + " body" : pawn.story.headType + " head");

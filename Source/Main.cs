@@ -24,6 +24,7 @@ namespace GeneTools
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "ResolveAllGraphics"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveAllGraphics), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGenerator), "GetBodyTypeFor"), postfix: new HarmonyMethod(typeof(GtPatches.GtGetBodyTypeFor), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_GeneTracker), "Notify_GenesChanged"), postfix: new HarmonyMethod(typeof(GtPatches.GtNotify_GenesChanged), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(LifeStageWorker_HumanlikeAdult), "Notify_LifeStageStarted"), prefix: new HarmonyMethod(typeof(GtPatches.GtNotify_LifeStageStarted), "Prefix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelRequirement), "AllowedForPawn"), postfix: new HarmonyMethod(typeof(GtPatches.GtAllowedForPawn), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(JobGiver_OptimizeApparel), "ApparelScoreGain"), postfix: new HarmonyMethod(typeof(GtPatches.GtApparelScoreGain), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"), postfix: new HarmonyMethod(typeof(GtPatches.GtCanUsePair), "Postfix"));
