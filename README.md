@@ -10,6 +10,7 @@ Differences here from the experimental branch:
 -  HAR compatibility improved and integrated - always on if HAR is installed.
 -  Refactored source code.
 -  New hair extension as GeneToolsHairDef.useSkinColor. Enabling this passes a pawn's skin color as a second color to the hair shader. This takes priority over HairModdingPlus when enabled.
+-  New body and head extensions as GeneToolsBodyTypeDef.enforceOnInvisibleApparel and GeneToolsHeadTypeDef.enforceOnInvisibleApparel. By default, invisible apparel is always acceptable on any body/head, since it will never be missing textures. Enabling this makes the head/body allowed check active on invisible apparel.
 
 Notes:
 -  Substitute bodies don't work on fur graphics (e.g. furskin), don't let a pawn have both at once! Looking in to this.
