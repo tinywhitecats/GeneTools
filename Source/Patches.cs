@@ -135,7 +135,7 @@ namespace GeneTools
         public static class GtResolveAllGraphics
         {
             [HarmonyPostfix]
-            //[HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
+            [HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
             public static void Postfix(ref PawnGraphicSet __instance)
             {
                 //Log.Message("GtResolveAllGraphics for " + __instance.pawn.Name);
