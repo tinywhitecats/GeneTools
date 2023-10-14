@@ -8,11 +8,13 @@ namespace GeneTools
     {
         public List<BodyTypeDef> forcedBodyTypes;
         public List<BodyTypeDef> forcedBodyTypesFemale;
+        public List<BodyTypeDef> forcedBodyTypesMale;
         public List<BodyTypeDef> forcedBodyTypesBaby;
         public List<BodyTypeDef> forcedBodyTypesChild;
 
         public List<HeadTypeDef> forcedHeadTypes;
         public List<HeadTypeDef> forcedHeadTypesFemale;
+        public List<HeadTypeDef> forcedHeadTypesMale;
         public List<HeadTypeDef> forcedHeadTypesBaby;
         public List<HeadTypeDef> forcedHeadTypesChild;
     }

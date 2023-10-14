@@ -63,7 +63,7 @@ namespace GeneTools
                     List<Gene> genesListForReading = pawn.genes.GenesListForReading;
                     foreach (Gene gene in genesListForReading)
                     {
-                        if (gene.def.HasModExtension<GeneToolsGeneDef>())
+                        if (gene.def.HasModExtension<GeneToolsGeneDef>() && gene.Active)
                         {
                             if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
                                 __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby.Count)];
@@ -71,6 +71,8 @@ namespace GeneTools
                                 __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild.Count)];
                             else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null && pawn.gender == Gender.Female && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
                                 __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesMale != null && pawn.gender == Gender.Male && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
+                                __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesMale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesMale.Count)];
                             else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
                                 __result = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes.Count)];
                             if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesBaby != null && pawn.DevelopmentalStage == DevelopmentalStage.Baby)
@@ -79,6 +81,8 @@ namespace GeneTools
                                 pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesChild.Count)];
                             else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale != null && pawn.gender == Gender.Female && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
                                 pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesFemale.Count)];
+                            else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesMale != null && pawn.gender == Gender.Male && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
+                                pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesMale[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypesMale.Count)];
                             else if (gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes != null && pawn.DevelopmentalStage == DevelopmentalStage.Adult)
                                 pawn.story.headType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedHeadTypes.Count)];
                         }
@@ -97,7 +101,12 @@ namespace GeneTools
                 {
                     if (addedOrRemovedGene != null && addedOrRemovedGene.HasModExtension<GeneToolsGeneDef>())
                     {
-                        if (addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null)
+                        if (___pawn.genes.GetGene(addedOrRemovedGene).Active && (
+                            addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null 
+                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null
+                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesMale != null
+                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null 
+                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null))
                         {
                             ___pawn.story.bodyType = Verse.PawnGenerator.GetBodyTypeFor(___pawn);
                             ___pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
