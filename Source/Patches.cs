@@ -234,12 +234,11 @@ namespace GeneTools
             }
         }
         /* Allow body to use substitute fur gene texture if available */
-        //Unfinished/broken
         [HarmonyPatch(typeof(FurDef), "GetFurBodyGraphicPath")]
         public static class GtResolveFurGraphic
         {
             [HarmonyPostfix]
-            public static void Postfix(ref Pawn pawn, string __result, FurDef __instance)
+            public static void Postfix(ref Pawn pawn, ref string __result, FurDef __instance)
             {
                 if (__result == null && pawn.story.bodyType.HasModExtension<GeneToolsBodyTypeDef>() &&
                     pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null)
@@ -248,7 +247,10 @@ namespace GeneTools
                     {
                         if (__instance.bodyTypeGraphicPaths[i].bodyType == 
                             pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody)
+                        {
                             __result = __instance.bodyTypeGraphicPaths[i].texturePath;
+                            break;
+                        }
                     }
                 }
             }

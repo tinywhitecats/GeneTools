@@ -13,7 +13,6 @@ Differences here from the experimental branch:
 -  New body and head extensions as GeneToolsBodyTypeDef.enforceOnInvisibleApparel and GeneToolsHeadTypeDef.enforceOnInvisibleApparel. By default, invisible apparel is always acceptable on any body/head, since it will never be missing textures. Enabling this makes the head/body allowed check active on invisible apparel.
 
 Notes:
--  Substitute bodies don't work on fur graphics (e.g. furskin), don't let a pawn have both at once! Looking in to this.
 -  Vanilla bodytype genes take precedent over forced bodytypes on adults. I've looked into this, but haven't figured out why.
 -  Changing pawn age via character editor doesn't always update body type. I should be able to fix this.
 
