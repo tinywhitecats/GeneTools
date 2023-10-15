@@ -3,6 +3,8 @@ using RimWorld;
 using System.Collections.Generic;
 using Verse;
 using UnityEngine;
+using System.Reflection.Emit;
+using System.Linq;
 
 namespace GeneTools 
 {
@@ -11,7 +13,6 @@ namespace GeneTools
         public static bool GtCanPawnEquip(ref ThingDef apparel, ref Pawn pawn)
         {
             //Log.Message("GtCanPawnEquip for " + pawn.Name + "," + apparel.defName);
-
             BodyTypeDef bodyType = pawn.story.bodyType;
             HeadTypeDef headType = pawn.story.headType;
             bool useSubstitute = apparel.HasModExtension<GeneToolsApparelDef>() && apparel.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes != null && !apparel.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType) && bodyType.HasModExtension<GeneToolsBodyTypeDef>() && bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null && apparel.GetModExtension<GeneToolsApparelDef>().allowedBodyTypes.Contains(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody) ? true : false;
@@ -137,6 +138,30 @@ namespace GeneTools
                                 (Apparel apparel) => !GtCanPawnEquip(ref apparel.def, ref p) || !apparel.def.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult));
                     }
                     //___pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
+                }
+            }
+        }
+        public static class GtFixChildBodyOnLoad
+        {   //Pawn_StoryTracker:ExposeData resets child bodies when the game loads
+            //this is reloads it - possible randomizing the body
+            //Obsolete by GtDisableLoadChildBodyFailsafe but present as an option in mod settings just in case transpiler breaks
+            [HarmonyPostfix]
+            public static void Postfix(ref Pawn_StoryTracker __instance, ref Pawn ___pawn)
+            {
+                if (___pawn.genes != null)
+                {
+                    List<Gene> genesListForReading = ___pawn.genes.GenesListForReading;
+                    foreach (Gene gene in genesListForReading)
+                    {
+                        if (gene.Active && gene.def.HasModExtension<GeneToolsGeneDef>()
+                            && gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null
+                            && ___pawn.DevelopmentalStage == DevelopmentalStage.Child)
+                        {
+                            __instance.bodyType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild.Count)];
+                            Log.Message("[GeneTools] overwrote child body on load.");
+                            return;
+                        }
+                    }
                 }
             }
         }
@@ -325,6 +350,49 @@ namespace GeneTools
                     string hairTexturePath = __instance.pawn.story.hairDef.texPath;
                     __instance.hairGraphic = hairTexturePath == null ? null : GraphicDatabase.Get<Graphic_Multi>(hairTexturePath, ShaderDatabase.CutoutComplex, Vector2.one, __instance.pawn.story.HairColor, __instance.pawn.story.SkinColor);
                 }
+            }
+        }
+        public static class GtDisableLoadChildBodyFailsafe
+        {
+            //Rimworld resets child bodies on save load
+            //This disables that feature
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                Log.Message("[GeneTools] Transpiling Pawn_StoryTracker.ExposeData");
+                var foundBodyTypeBranch = false;
+                var codes = new List<CodeInstruction>(instructions);
+                int i = 0;
+                for (; i < codes.Count - 1; i++)
+                {
+                    if (codes[i].opcode == OpCodes.Ldfld && codes[i + 1].opcode == OpCodes.Ldsfld)
+                    {
+                        if (codes[i + 1].operand.ToString() == "RimWorld.BodyTypeDef Child")
+                        {
+                            foundBodyTypeBranch = true;
+                            break;
+                        }
+                    }
+                }
+                //The problematic code:
+                /*if (ModsConfig.BiotechActive && this.pawn.DevelopmentalStage.Child() && this.bodyType != BodyTypeDefOf.Child) {
+                    ...
+                    this.bodyType = BodyTypeDefOf.Child; }
+
+                This swaps 'this.bodyType != BodyTypeDefOf.Child' into constant false
+                 */
+                if (foundBodyTypeBranch)
+                {
+                    codes[i].opcode = OpCodes.Nop; //Disable parameter setup
+                    codes[i - 1].opcode = OpCodes.Nop; //Disable first parameter
+                    codes[i + 1].opcode = OpCodes.Nop; //Disable second parameter
+                    codes[i + 2].opcode = OpCodes.Br; //Switch branch to unconditional
+                    Log.Message("[GeneTools] Transpile success.");
+                } else
+                {
+                    Log.Error("[GeneTools] Transpile failed! Not able to find branch sequence!");
+                }
+
+                return codes.AsEnumerable();
             }
         }
     }

@@ -32,12 +32,19 @@ namespace GeneTools
                     harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtPatches.GtCanEquip), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "CalculateHairMats"), postfix: new HarmonyMethod(typeof(GtPatches.GtCalculateHairMats), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(FurDef), "GetFurBodyGraphicPath"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveFurGraphic), "Postfix"));
+
+                    if (!GeneToolsSettings.disableTranspile)
+                    { harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_StoryTracker), "ExposeData"), transpiler: new HarmonyMethod(typeof(GtPatches.GtDisableLoadChildBodyFailsafe), "Transpiler"));
+                    } else
+                    { harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_StoryTracker), "ExposeData"), postfix: new HarmonyMethod(typeof(GtPatches.GtFixChildBodyOnLoad), "Postfix"));
+                    }
+
                     if (HARactive)
                     {
                         Log.Message("[GeneTools] Detected HAR!");
                         HARPatcher.patch();
                     }
-                    Log.Message("[GeneTools] Active");
+                    Log.Message("[GeneTools] Active.");
                 }))();
             }
             catch (TypeLoadException e) {
