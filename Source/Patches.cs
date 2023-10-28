@@ -97,17 +97,19 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(ref Pawn ___pawn, ref GeneDef addedOrRemovedGene)
             {
-                //Log.Message("GtNotify_GenesChanged for " + ___pawn.Name);
+                //Log.Message("GtNotify_GenesChanged for " + ___pawn.Name + " of " + addedOrRemovedGene.defName);
                 if (___pawn.RaceProps.Humanlike)
                 {
                     if (addedOrRemovedGene != null && addedOrRemovedGene.HasModExtension<GeneToolsGeneDef>())
                     {
-                        if (___pawn.genes.GetGene(addedOrRemovedGene).Active && (
+                        // if ___pawn.genes.HasGene(addedOrRemovedGene) && ___pawn.genes.GetGene(addedOrRemovedGene).Active &&*/
+                        // Possible for gene to not exist on pawn here - also this would break making it inactive anyway. What was I thinking? 
+                        if (
                             addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null 
                             || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null
                             || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesMale != null
                             || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null 
-                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null))
+                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null)
                         {
                             ___pawn.story.bodyType = Verse.PawnGenerator.GetBodyTypeFor(___pawn);
                             ___pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
