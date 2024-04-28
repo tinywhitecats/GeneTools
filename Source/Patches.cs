@@ -12,6 +12,7 @@ namespace GeneTools
     {
         public static bool GtCanPawnEquip(ref ThingDef apparel, ref Pawn pawn)
         {
+            //Can I cache this or something? ._.
             //Log.Message("GtCanPawnEquip for " + pawn.Name + "," + apparel.defName);
             BodyTypeDef bodyType = pawn.story.bodyType;
             HeadTypeDef headType = pawn.story.headType;
@@ -19,7 +20,7 @@ namespace GeneTools
             bool useSubstituteForced = apparel.HasModExtension<GeneToolsApparelDef>() && apparel.GetModExtension<GeneToolsApparelDef>().forcedBodyTypes != null && !apparel.GetModExtension<GeneToolsApparelDef>().forcedBodyTypes.Contains(bodyType) && bodyType.HasModExtension<GeneToolsBodyTypeDef>() && bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null && apparel.GetModExtension<GeneToolsApparelDef>().forcedBodyTypes.Contains(bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody) ? true : false;
             bool isHat = apparel.apparel.LastLayer == ApparelLayerDefOf.Overhead || apparel.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.FullHead) || apparel.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.UpperHead) || apparel.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.Eyes) ? true : false;
             bool isInvisible = apparel.apparel.wornGraphicPath == BaseContent.PlaceholderImagePath || apparel.apparel.wornGraphicPath == BaseContent.PlaceholderGearImagePath || apparel.apparel.wornGraphicPath == "" ? true : false;
-            
+
             bool enforceInvisibleBody = bodyType.HasModExtension<GeneToolsBodyTypeDef>() && bodyType.GetModExtension<GeneToolsBodyTypeDef>().enforceOnInvisibleApparel;
             bool enforceInvisibleHead = headType.HasModExtension<GeneToolsHeadTypeDef>() && headType.GetModExtension<GeneToolsHeadTypeDef>().enforceOnInvisibleApparel;
             //Log.Message(bodyType.defName + "," + headType.defName + "," + useSubstitute + "," + isHat + "," + isInvisible);
@@ -105,14 +106,14 @@ namespace GeneTools
                         // if ___pawn.genes.HasGene(addedOrRemovedGene) && ___pawn.genes.GetGene(addedOrRemovedGene).Active &&*/
                         // Possible for gene to not exist on pawn here - also this would break making it inactive anyway. What was I thinking? 
                         if (
-                            addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null 
+                            addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypes != null
                             || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesFemale != null
                             || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesMale != null
-                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null 
+                            || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null
                             || addedOrRemovedGene.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesBaby != null)
                         {
                             ___pawn.story.bodyType = Verse.PawnGenerator.GetBodyTypeFor(___pawn);
-                            ___pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
+                            ___pawn.Drawer.renderer.SetAllGraphicsDirty();
                         }
                     }
                 }
@@ -167,28 +168,58 @@ namespace GeneTools
                 }
             }
         }
-        /* Apply changes to body and head */
-        public static class GtResolveAllGraphics
+        //1.5 very helpfully added getGraphic to headDefs, so this is much cleaner
+        public static class GtHeadDefGetGraphic
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(ref HeadTypeDef __instance, ref Pawn pawn, ref Color color, ref Graphic_Multi __result)
+            {
+                //Log.Message("GtHeadDefGetGraphic for " + pawn.Name);
+                //humanlike check unneccesary?
+                if (pawn.RaceProps.Humanlike && __instance.HasModExtension<GeneToolsHeadTypeDef>())
+                {
+                    Color skinColor = pawn.story.SkinColor;
+                    Color hairColor = pawn.story.HairColor;
+                    List<KeyValuePair<Color, Graphic_Multi>> graphics = Traverse.Create(__instance).Field("graphics").GetValue() as List<KeyValuePair<Color, Graphic_Multi>>;
+                    if (__instance.GetModExtension<GeneToolsHeadTypeDef>().useShader == true)
+                    {
+                        Graphic_Multi graphic_Multi = (Graphic_Multi)GraphicDatabase.Get<Graphic_Multi>(pawn.story.headType.graphicPath, ShaderDatabase.CutoutComplex, Vector2.one, skinColor, hairColor);
+                        graphics.Add(new KeyValuePair<Color, Graphic_Multi>(color, graphic_Multi));
+                        __result = graphic_Multi;
+                        return false;
+                    }
+                    else if (__instance.GetModExtension<GeneToolsHeadTypeDef>().colorHead == false)
+                    {
+                        Graphic_Multi graphic_Multi = (Graphic_Multi)GraphicDatabase.Get<Graphic_Multi>(pawn.story.headType.graphicPath, ShaderUtility.GetSkinShader(pawn), Vector2.one, Color.white);
+                        graphics.Add(new KeyValuePair<Color, Graphic_Multi>(color, graphic_Multi));
+                        __result = graphic_Multi;
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        //Unlike this, for bodies
+        public static class GtBodyNodeGraphicFor
         {
             [HarmonyPostfix]
-            [HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
-            public static void Postfix(ref PawnGraphicSet __instance)
+            public static void Postfix(ref PawnRenderNode_Body __instance, ref Pawn pawn, ref Graphic __result)
             {
-                //Log.Message("GtResolveAllGraphics for " + __instance.pawn.Name);
-                if (__instance.pawn.RaceProps.Humanlike)
+                //Log.Message("GtBodyNodeGraphicFor for " + pawn.Name);
+                //humanlike check unneccesary?
+                if (pawn.RaceProps.Humanlike && pawn.story.bodyType.HasModExtension<GeneToolsBodyTypeDef>()
+                    && pawn.Drawer.renderer.CurRotDrawMode != RotDrawMode.Dessicated
+                    && !(ModsConfig.AnomalyActive && pawn.IsMutant && !pawn.mutant.Def.bodyTypeGraphicPaths.NullOrEmpty<BodyTypeGraphicData>())
+                    && !(ModsConfig.AnomalyActive && pawn.IsCreepJoiner && pawn.story.bodyType != null && !pawn.creepjoiner.form.bodyTypeGraphicPaths.NullOrEmpty<BodyTypeGraphicData>())
+                    )
                 {
-                    Color skinColor = __instance.pawn.story.SkinColor;
-                    Color hairColor = __instance.pawn.story.HairColor;
-                    if (__instance.pawn.story.bodyType.HasModExtension<GeneToolsBodyTypeDef>() && __instance.pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().useShader == true)
-                        __instance.nakedGraphic = GraphicDatabase.Get<Graphic_Multi>(__instance.pawn.story.bodyType.bodyNakedGraphicPath, ShaderDatabase.CutoutComplex, Vector2.one, skinColor, hairColor);
-                    else if (__instance.pawn.story.bodyType.HasModExtension<GeneToolsBodyTypeDef>() && __instance.pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().colorBody == false)
-                        __instance.nakedGraphic = GraphicDatabase.Get<Graphic_Multi>(__instance.pawn.story.bodyType.bodyNakedGraphicPath, ShaderUtility.GetSkinShader(__instance.pawn.story.SkinColorOverriden), Vector2.one, Color.white);
-                    if (__instance.pawn.story.headType.HasModExtension<GeneToolsHeadTypeDef>() && __instance.pawn.story.headType.GetModExtension<GeneToolsHeadTypeDef>().useShader == true)
-                        __instance.headGraphic = GraphicDatabase.Get<Graphic_Multi>(__instance.pawn.story.headType.graphicPath, ShaderDatabase.CutoutComplex, Vector2.one, skinColor, hairColor);
-                    else if (__instance.pawn.story.headType.HasModExtension<GeneToolsHeadTypeDef>() && __instance.pawn.story.headType.GetModExtension<GeneToolsHeadTypeDef>().colorHead == false)
-                        __instance.headGraphic = GraphicDatabase.Get<Graphic_Multi>(__instance.pawn.story.headType.graphicPath, ShaderUtility.GetSkinShader(__instance.pawn.story.SkinColorOverriden), Vector2.one, Color.white);
+                    Color skinColor = pawn.story.SkinColor;
+                    Color hairColor = pawn.story.HairColor;
+                    if (pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().useShader == true)
+                        __result = GraphicDatabase.Get<Graphic_Multi>(pawn.story.bodyType.bodyNakedGraphicPath, ShaderDatabase.CutoutComplex, Vector2.one, skinColor, hairColor);
+                    else if (pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().colorBody == false)
+                        __result = GraphicDatabase.Get<Graphic_Multi>(pawn.story.bodyType.bodyNakedGraphicPath, ShaderUtility.GetSkinShader(pawn), Vector2.one, Color.white);
                 }
-                GtCalculateHairMats.Postfix(__instance);
             }
         }
         /* Prevent player from making pawn equip apparel that doesn't fit the body */
@@ -313,7 +344,7 @@ namespace GeneTools
                 return true;
             }
         }
-        public static class GtResolveAllGraphicsStopHAR
+        /*public static class GtResolveAllGraphicsStopHAR
         {
             //HAR will absolutely crash the game if the ResolveAllGraphics patch runs on a GT pawn.
             //This stops the patch and forces it to continue to vanilla functions.
@@ -353,7 +384,7 @@ namespace GeneTools
                     __instance.hairGraphic = hairTexturePath == null ? null : GraphicDatabase.Get<Graphic_Multi>(hairTexturePath, ShaderDatabase.CutoutComplex, Vector2.one, __instance.pawn.story.HairColor, __instance.pawn.story.SkinColor);
                 }
             }
-        }
+        }*/
         public static class GtDisableLoadChildBodyFailsafe
         {
             //Rimworld resets child bodies on save load

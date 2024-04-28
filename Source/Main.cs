@@ -21,7 +21,6 @@ namespace GeneTools
             {
                 ((Action)(() =>
                 {
-                    harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "ResolveAllGraphics"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveAllGraphics), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGenerator), "GetBodyTypeFor"), postfix: new HarmonyMethod(typeof(GtPatches.GtGetBodyTypeFor), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_GeneTracker), "Notify_GenesChanged"), postfix: new HarmonyMethod(typeof(GtPatches.GtNotify_GenesChanged), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(LifeStageWorker_HumanlikeAdult), "Notify_LifeStageStarted"), prefix: new HarmonyMethod(typeof(GtPatches.GtNotify_LifeStageStarted), "Prefix"));
@@ -30,9 +29,9 @@ namespace GeneTools
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"), postfix: new HarmonyMethod(typeof(GtPatches.GtCanUsePair), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicRecordGetter), "TryGetGraphicApparel"), prefix: new HarmonyMethod(typeof(GtPatches.GtResolveApparelGraphic), "Prefix"));
                     harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtPatches.GtCanEquip), "Postfix"));
-                    harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnGraphicSet), "CalculateHairMats"), postfix: new HarmonyMethod(typeof(GtPatches.GtCalculateHairMats), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(HeadTypeDef), "GetGraphic"), prefix: new HarmonyMethod(typeof(GtPatches.GtHeadDefGetGraphic), "Prefix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnRenderNode_Body), "GraphicFor"), postfix: new HarmonyMethod(typeof(GtPatches.GtBodyNodeGraphicFor), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(FurDef), "GetFurBodyGraphicPath"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveFurGraphic), "Postfix"));
-
                     if (!GeneToolsSettings.disableTranspile)
                     { harmony.Patch((MethodBase)AccessTools.Method(typeof(Pawn_StoryTracker), "ExposeData"), transpiler: new HarmonyMethod(typeof(GtPatches.GtDisableLoadChildBodyFailsafe), "Transpiler"));
                     } else
