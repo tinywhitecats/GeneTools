@@ -30,6 +30,7 @@ namespace GeneTools
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(ApparelGraphicRecordGetter), "TryGetGraphicApparel"), prefix: new HarmonyMethod(typeof(GtPatches.GtResolveApparelGraphic), "Prefix"));
                     harmony.Patch(typeof(EquipmentUtility).GetMethod("CanEquip", new[] { typeof(Thing), typeof(Pawn), typeof(string).MakeByRefType(), typeof(bool) }), postfix: new HarmonyMethod(typeof(GtPatches.GtCanEquip), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(HeadTypeDef), "GetGraphic"), prefix: new HarmonyMethod(typeof(GtPatches.GtHeadDefGetGraphic), "Prefix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(HairDef), "GraphicFor"), prefix: new HarmonyMethod(typeof(GtPatches.GtHairDefGetGraphicFor), "Prefix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(PawnRenderNode_Body), "GraphicFor"), postfix: new HarmonyMethod(typeof(GtPatches.GtBodyNodeGraphicFor), "Postfix"));
                     harmony.Patch((MethodBase)AccessTools.Method(typeof(FurDef), "GetFurBodyGraphicPath"), postfix: new HarmonyMethod(typeof(GtPatches.GtResolveFurGraphic), "Postfix"));
                     if (!GeneToolsSettings.disableTranspile)

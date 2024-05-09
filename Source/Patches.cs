@@ -199,6 +199,27 @@ namespace GeneTools
                 return true;
             }
         }
+        public static class GtHairDefGetGraphicFor
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(ref HairDef __instance, ref Pawn pawn, ref Color color, ref Graphic __result)
+            {
+                //Log.Message("GtHairDefGetGraphicFor for " + pawn.Name);
+                //humanlike check unneccesary?
+                if (pawn.RaceProps.Humanlike && __instance.HasModExtension<GeneToolsHairDef>())
+                {
+                    Color skinColor = pawn.story.SkinColor;
+                    Color hairColor = pawn.story.HairColor;
+                    if (__instance.GetModExtension<GeneToolsHairDef>().useSkinColor == true)
+                    {
+                        Graphic_Multi graphic_Multi = (Graphic_Multi)GraphicDatabase.Get<Graphic_Multi>(__instance.texPath, ShaderDatabase.CutoutComplex, Vector2.one, hairColor, skinColor);
+                        __result = graphic_Multi;
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
         //Unlike this, for bodies
         public static class GtBodyNodeGraphicFor
         {
@@ -229,7 +250,7 @@ namespace GeneTools
             public static void Postfix(ref Thing thing, ref Pawn pawn, ref string cantReason, ref bool __result)
             {
                 //Log.Message("GtCanEquip for " + pawn.Name);
-                if (pawn.RaceProps.Humanlike && __result && thing.def.IsApparel)
+                if (pawn.RaceProps.Humanlike && __result && thing.def.IsApparel && __result)
                 {
                     bool isHat = thing.def.apparel.LastLayer == ApparelLayerDefOf.Overhead 
                         || thing.def.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.FullHead) 
