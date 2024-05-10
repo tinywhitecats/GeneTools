@@ -172,7 +172,7 @@ namespace GeneTools
         public static class GtHeadDefGetGraphic
         {
             [HarmonyPrefix]
-            public static bool Prefix(ref HeadTypeDef __instance, ref Pawn pawn, ref Color color, ref Graphic_Multi __result)
+            public static bool Prefix(ref HeadTypeDef __instance, ref Pawn pawn,/* ref Color color,*/ ref Graphic_Multi __result)
             {
                 //Log.Message("GtHeadDefGetGraphic for " + pawn.Name);
                 //humanlike check unneccesary?
@@ -180,18 +180,18 @@ namespace GeneTools
                 {
                     Color skinColor = pawn.story.SkinColor;
                     Color hairColor = pawn.story.HairColor;
-                    List<KeyValuePair<Color, Graphic_Multi>> graphics = Traverse.Create(__instance).Field("graphics").GetValue() as List<KeyValuePair<Color, Graphic_Multi>>;
+                    //List<KeyValuePair<Color, Graphic_Multi>> graphics = Traverse.Create(__instance).Field("graphics").GetValue() as List<KeyValuePair<Color, Graphic_Multi>>;
                     if (__instance.GetModExtension<GeneToolsHeadTypeDef>().useShader == true)
                     {
                         Graphic_Multi graphic_Multi = (Graphic_Multi)GraphicDatabase.Get<Graphic_Multi>(pawn.story.headType.graphicPath, ShaderDatabase.CutoutComplex, Vector2.one, skinColor, hairColor);
-                        graphics.Add(new KeyValuePair<Color, Graphic_Multi>(color, graphic_Multi));
+                        //graphics.Add(new KeyValuePair<Color, Graphic_Multi>(color, graphic_Multi));
                         __result = graphic_Multi;
                         return false;
                     }
                     else if (__instance.GetModExtension<GeneToolsHeadTypeDef>().colorHead == false)
                     {
                         Graphic_Multi graphic_Multi = (Graphic_Multi)GraphicDatabase.Get<Graphic_Multi>(pawn.story.headType.graphicPath, ShaderUtility.GetSkinShader(pawn), Vector2.one, Color.white);
-                        graphics.Add(new KeyValuePair<Color, Graphic_Multi>(color, graphic_Multi));
+                        //graphics.Add(new KeyValuePair<Color, Graphic_Multi>(color, graphic_Multi));
                         __result = graphic_Multi;
                         return false;
                     }
@@ -343,69 +343,15 @@ namespace GeneTools
                 }
             }
         }
-        /* Patch to HAR's substitute body system */
-        public static class GtTryGetBodyTypeFallbackHARPatch
+        public static class GtBodyGraphicForPrefixHARPostfix
         {
+            //Avoids an error being thrown by HAR
             [HarmonyPrefix]
-            public static bool Prefix(ref Pawn pawn, out BodyTypeDef def, ref bool __result)
+            public static bool Prefix(object[] __args)
             {
-                //Log.Message("GtTryGetBodyTypeFallbackHARPatch for " + pawn.Name);
-                def = (BodyTypeDef)null;
-                if (pawn == null) //continue to original
-                    return true;
-                if (pawn.RaceProps.Humanlike)
-                {
-                    if (pawn.story.bodyType.HasModExtension<GeneToolsBodyTypeDef>() && pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody != null)
-                    {
-                        def = pawn.story.bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody;
-                        __result = true;
-                        return false; //skip original if human with patch (!!!)
-                    }   //I think this skip could be removed with a transpiler?
-                }       //As is, I think humans with Gene Tools substitutes can't use HAR substitutes?
-                return true;
+                return !((Pawn)__args[1]).story.bodyType.HasModExtension<GeneToolsBodyTypeDef>();
             }
         }
-        /*public static class GtResolveAllGraphicsStopHAR
-        {
-            //HAR will absolutely crash the game if the ResolveAllGraphics patch runs on a GT pawn.
-            //This stops the patch and forces it to continue to vanilla functions.
-            [HarmonyPrefix]
-            public static bool Prefix(object[] __args, ref bool __result)
-            {
-                PawnGraphicSet __instance = (PawnGraphicSet)__args[0]; //Can't access __instance normally since Harmony interprets that literally
-                //Log.Message("GtResolveAllGraphicsStopHAR for " + __instance.pawn.Name);
-                if (__instance.pawn.RaceProps.Humanlike)
-                {
-                    bool isGTHuman = false;
-                    List<Gene> genesListForReading = __instance.pawn.genes.GenesListForReading;
-                    foreach (Gene gene in genesListForReading)
-                    {
-                        if (gene.def.HasModExtension<GeneToolsGeneDef>())
-                        {
-                            isGTHuman = true;
-                            break;
-                        }
-                    }
-                    __result = isGTHuman;
-                    return !isGTHuman;
-                }
-                return true;
-            }
-        }
-        public static class GtCalculateHairMats {
-            [HarmonyAfter(new string[] { "butterfish.hairmoddingplus" })]
-            [HarmonyPostfix]
-            public static void Postfix(PawnGraphicSet __instance)
-            {
-                if (__instance.pawn.RaceProps.Humanlike
-                    && __instance.pawn.story.hairDef.HasModExtension<GeneToolsHairDef>() 
-                    && __instance.pawn.story.hairDef.GetModExtension<GeneToolsHairDef>().useSkinColor == true)
-                {
-                    string hairTexturePath = __instance.pawn.story.hairDef.texPath;
-                    __instance.hairGraphic = hairTexturePath == null ? null : GraphicDatabase.Get<Graphic_Multi>(hairTexturePath, ShaderDatabase.CutoutComplex, Vector2.one, __instance.pawn.story.HairColor, __instance.pawn.story.SkinColor);
-                }
-            }
-        }*/
         public static class GtDisableLoadChildBodyFailsafe
         {
             //Rimworld resets child bodies on save load
