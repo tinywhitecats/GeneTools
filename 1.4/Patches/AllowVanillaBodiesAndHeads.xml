@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Patch>
 <Operation Class="PatchOperationAddModExtension">
-	<xpath>/Defs/ThingDef[boolean(apparel)]</xpath>
+	<xpath>/Defs/ThingDef[boolean(apparel)][not(@Abstract)]</xpath>
 	<value>
 		<li Class="GeneTools.GeneToolsApparelDef">
 			<allowedBodyTypes>
