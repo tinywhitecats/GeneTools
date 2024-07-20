@@ -147,9 +147,11 @@ namespace GeneTools
         {
             //only runs on adults - LifeStageWorker_HumanlikeAdult
             [HarmonyPrefix]
-            public static void Prefix(ref Pawn pawn)
+            public static void Prefix(ref Pawn pawn, ref LifeStageDef previousLifeStage)
             {
                 //Log.Message("Notify_LifeStageStarted for " + pawn.Name);
+                if (previousLifeStage == null) //wtf? addiction checker calls this with null lifeStage on load. 1.5 bug?
+                    return;
                 if (pawn.RaceProps.Humanlike)
                 {
                     HeadTypeDef oldHead = pawn.story.headType;
@@ -174,17 +176,16 @@ namespace GeneTools
             [HarmonyPostfix]
             public static void Postfix(ref Pawn_StoryTracker __instance, ref Pawn ___pawn)
             {
-                if (___pawn.genes != null)
+                if (___pawn.genes != null && ___pawn.DevelopmentalStage == DevelopmentalStage.Child)
                 {
                     List<Gene> genesListForReading = ___pawn.genes.GenesListForReading;
                     foreach (Gene gene in genesListForReading)
                     {
                         if (gene.Active && gene.def.HasModExtension<GeneToolsGeneDef>()
-                            && gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null
-                            && ___pawn.DevelopmentalStage == DevelopmentalStage.Child)
+                            && gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild != null)
                         {
                             __instance.bodyType = gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild[UnityEngine.Random.Range(0, gene.def.GetModExtension<GeneToolsGeneDef>().forcedBodyTypesChild.Count)];
-                            Log.Message("[GeneTools] overwrote child body on load.");
+                            //Log.Message("[GeneTools] overwrote child body on load.");
                             return;
                         }
                     }
