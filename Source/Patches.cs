@@ -55,7 +55,8 @@ namespace GeneTools
                 }
 
                 //Vanilla body bypass check
-                string[] vanillaBodies = { "Child", "Male", "Female", "Thin", "Fat", "Hulk" };
+                //Pending a more elegant solution, femaleBB is in here. The built-in patch in femaleBB is going to throw errors on startup though...
+                string[] vanillaBodies = { "Child", "Male", "Female", "Thin", "Fat", "Hulk", "FemaleBB" };
                 if (vanillaBodies.Contains(bodyType.defName) || (bodyTypeSub != null && vanillaBodies.Contains(bodyTypeSub.defName)))
                     return true;
 
@@ -337,7 +338,7 @@ namespace GeneTools
                     || bodyType.GetModExtension<GeneToolsBodyTypeDef>().substituteBody == null)
                     return;
                 //Check if it's an unforced vanilla body or forced custom
-                string[] vanillaBodies = { "Child", "Male", "Female", "Thin", "Fat", "Hulk" };
+                string[] vanillaBodies = { "Child", "Male", "Female", "Thin", "Fat", "Hulk", "FemaleBB" };
                 bool appHasMod = apparel.def.HasModExtension<GeneToolsApparelDef>();
                 if (vanillaBodies.Contains(bodyType.defName) && 
                     (!appHasMod || (apparel.def.GetModExtension<GeneToolsApparelDef>().forcedBodyTypes == null) || apparel.def.GetModExtension<GeneToolsApparelDef>().forcedBodyTypes.Contains(bodyType)))
