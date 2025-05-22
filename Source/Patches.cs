@@ -52,6 +52,8 @@ namespace GeneTools
                     List<BodyTypeDef> forcedTypes = apparel.GetModExtension<GeneToolsApparelDef>().forcedBodyTypes;
                     if (forcedTypes != null && !forcedTypes.Contains(bodyType) && !forcedTypes.Contains(bodyTypeSub))
                         return false;
+                } else if (!bodyHasMod) {
+                    return true; //not this mod's business
                 }
 
                 //Vanilla body bypass check
