@@ -31,13 +31,13 @@ namespace GeneTools
     {
         public bool colorBody = true;
         public BodyTypeDef substituteBody;
-        public bool useShader;
+        public bool useShader = false;
         public bool enforceOnInvisibleApparel = false;
     }
     public class GeneToolsHeadTypeDef : DefModExtension
     {
         public bool colorHead = true;
-        public bool useShader;
+        public bool useShader = false;
         public bool enforceHelmets = false;
         public bool enforceOnInvisibleApparel = false;
     }

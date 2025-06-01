@@ -16,8 +16,8 @@ namespace GeneTools
             {
                 ((Action)(() =>
                 {
-                    harmony.Patch((MethodBase)AccessTools.Method(typeof(AlienRace.AlienRenderTreePatches), "BodyGraphicForPrefix"), prefix: new HarmonyMethod(typeof(GtPatches.GtBodyGraphicForPrefixHARPostfix), "Prefix"));
-                    //harmony.Patch((MethodBase)AccessTools.Method(typeof(AlienRace.AlienRenderTreePatches), "HeadGraphicForPrefix"), postfix: new HarmonyMethod(typeof(GtPatches.GtHeadGraphicForPrefixHARPostfix), "Postfix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(AlienRace.AlienRenderTreePatches), "BodyGraphicForPrefix"), prefix: new HarmonyMethod(typeof(GtPatches.GtBodyGraphicForPrefixHARPrefix), "Prefix"));
+                    harmony.Patch((MethodBase)AccessTools.Method(typeof(AlienRace.AlienRenderTreePatches), "HeadGraphicForPrefix"), prefix: new HarmonyMethod(typeof(GtPatches.GtHeadGraphicForPrefixHARPrefix), "Prefix"));
                 }))();
             }
             catch (TypeLoadException e) {

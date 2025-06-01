@@ -374,15 +374,44 @@ namespace GeneTools
                 }
             }
         }
-        public static class GtBodyGraphicForPrefixHARPostfix
+        public static class GtBodyGraphicForPrefixHARPrefix
         {
-            //Avoids an error being thrown by HAR
+            //HAR replaces BodyGraphicFor by returning false with a prefix
+            //Patch their prefix to return true if pawn's bodytype uses GT render options
             [HarmonyPrefix]
-            public static bool Prefix(object[] __args)
+            public static bool Prefix(object[] __args, ref bool __result)
             {
-                return !((Pawn)__args[1]).story.bodyType.HasModExtension<GeneToolsBodyTypeDef>();
+                if (((Pawn)__args[1]).story.bodyType.HasModExtension<GeneToolsBodyTypeDef>())
+                {
+                    //vanilla needs to run if !colorBody or useShader, otherwise HAR's is fine
+                    GeneToolsBodyTypeDef ext = ((Pawn)__args[1]).story.bodyType.GetModExtension<GeneToolsBodyTypeDef>();
+                    if (ext.colorBody && !ext.useShader)
+                        return true;
+                    __result = true;
+                    return false;
+                }
+                return true;
             }
         }
+        public static class GtHeadGraphicForPrefixHARPrefix
+        {
+            //Head version of above patch
+            [HarmonyPrefix]
+            public static bool Prefix(object[] __args, ref bool __result)
+            {
+                if (((Pawn)__args[1]).story.headType.HasModExtension<GeneToolsHeadTypeDef>())
+                {
+                    //vanilla needs to run if !colorBody or useShader, otherwise HAR's is fine
+                    GeneToolsHeadTypeDef ext = ((Pawn)__args[1]).story.headType.GetModExtension<GeneToolsHeadTypeDef>();
+                    if (ext.colorHead && !ext.useShader)
+                        return true;
+                    __result = true;
+                    return false;
+                }
+                return true;
+            }
+        }
+
         public static class GtDisableLoadChildBodyFailsafe
         {
             //Rimworld resets child bodies on save load
